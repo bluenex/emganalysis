@@ -22,8 +22,8 @@ data = [] # pre-allocation
 f = open(filename)
 for i, line in enumerate(f):
     if i == 0:
-        freqUsed = line.split()  # collect frequency used
-        # print 'freqUsed', freqUsed
+        samplingRate = line.split()  # collect frequency used
+        # print 'samplingRate', samplingRate
     elif i == 2:
         header = line  # collect header
         # print 'header', header
