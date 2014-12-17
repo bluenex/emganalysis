@@ -3,6 +3,8 @@ import linecache
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
+import sys
+import smootingFilter
 
 ##### time counting
 timeStart = datetime.datetime.now()
@@ -45,8 +47,32 @@ dataColNo = len(finalHeader) # number of data in column
 ##### data manipulation
 data = np.resize(data, (dataRowNo, dataColNo))  # 0th row is number of each data
 data = data.astype(np.float)
-data = abs(data)
-data[:,0] = data[:,0]/1024
+data = abs(data)  # rectification
+windowSize = 32  # window size for smoothing
+data[:, 0] = data[:, 0]/1024  # scaling label to be sec
+
+### smoothing filter
+filteredData = smootingFilter.movingAvg(windowSize, data[:, 1:])  # ignore label of data number, data[:,0]
+label = []
+label = data[0:dataRowNo-windowSize, 0]/1024  # scaling label to be sec
+
+# newdtRow = np.size(newData, 0)
+# newdtCol = np.size(newData, 1)
+# print 'row = %d, col = %d' % (newdtRow, newdtCol)
+# print 'start data', newData[0, :]
+#
+# print 'end data', newData[-1:-10:-1, :]
+
+# windowSize = 32
+# startPoint = windowSize/2 # 16
+# print 'startPoint[%d]' % startPoint, data[startPoint-1, 1:6]
+# print 'window initial point[%s]' % str(startPoint-startPoint), data[startPoint-startPoint, 1:6]
+# print 'window terminal point[%s]' % str(startPoint+startPoint-1), data[startPoint+startPoint-1, 1:6]
+# print 'sum value no parentheses', sum(data[startPoint-startPoint:startPoint+startPoint-1, 1:6])/windowSize
+# print 'sum value with parentheses', (sum(data[startPoint-startPoint:startPoint+startPoint-1, 1:6]))/windowSize
+# print data[:,1:]
+
+
 # print data[:, 0]
 
 
@@ -58,19 +84,24 @@ data[:,0] = data[:,0]/1024
 
 ##### plotting
 plt.figure(subjectName+' '+filename)
-plotOrder = [1, 6, 2, 7, 3, 8, 4, 9, 5, 10]
+
+# plotOrder = [1, 6, 2, 7, 3, 8, 4, 9, 5, 10]  # without filtering
+plotOrder = [0, 5, 1, 6, 2, 7, 3, 8, 4, 9]  # with filtering
 for i in range(len(plotOrder)):
 # for i in range(10):
     plt.subplot(5, 2, 1+i)
-    # plt.plot(data[range(np.size(data, 0)), plotOrder[i]])
+    ### without filtering
+    # plt.plot(data[:, 0], data[range(np.size(data, 0)), plotOrder[i]])
     # plt.title(finalHeader[plotOrder[i]])
-    plt.plot( data[:, 0], data[range(np.size(data, 0)), plotOrder[i]])
-    plt.title(finalHeader[plotOrder[i]])
+    ### with filtering
+    plt.plot(label, filteredData[:, plotOrder[i]])
+    plt.title(finalHeader[plotOrder[i]+1])
+    ### basic structure
     # plt.plot(data[range(np.size(data, 0)), i])
     # plt.title(finalHeader[i])
-# plt.tight_layout()
-plt.subplots_adjust(hspace=0.35)
-# plt.show()
+# plt.tight_layout()  # tighten subplot layout
+plt.subplots_adjust(hspace=0.35)  # more specific that tight
+
 
 ##### time counting
 timeStop = datetime.datetime.now()
