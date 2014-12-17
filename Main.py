@@ -11,8 +11,8 @@ timeStart = datetime.datetime.now()
 
 ##### file section
 subjectName = 'Aon'
-filename = '0_3roll.ASC'
-# filename = '0_3yaw.ASC'
+# filename = '0_3roll.ASC'
+filename = '0_3yaw.ASC'
 
 # header = linecache.getline(filename, 3) # another method to get line
 
@@ -47,12 +47,14 @@ dataColNo = len(finalHeader) # number of data in column
 ##### data manipulation
 data = np.resize(data, (dataRowNo, dataColNo))  # 0th row is number of each data
 data = data.astype(np.float)
-data = abs(data)  # rectification
-windowSize = 32  # window size for smoothing
-data[:, 0] = data[:, 0]/1024  # scaling label to be sec
+# data = abs(data)  # rectification
+windowSize = 100  # window size for smoothing
+# data[:, 0] = data[:, 0]/1024  # scaling label to be sec
 
 ### smoothing filter
-filteredData = smootingFilter.movingAvg(windowSize, data[:, 1:])  # ignore label of data number, data[:,0]
+# filteredData = smootingFilter.movingAvg(windowSize, data[:, 1:])  # ignore label of data number, data[:,0]
+filteredData = smootingFilter.rms(windowSize, data[:, 1:])
+
 label = []
 label = data[0:dataRowNo-windowSize, 0]/1024  # scaling label to be sec
 
@@ -72,10 +74,6 @@ label = data[0:dataRowNo-windowSize, 0]/1024  # scaling label to be sec
 # print 'sum value with parentheses', (sum(data[startPoint-startPoint:startPoint+startPoint-1, 1:6]))/windowSize
 # print data[:,1:]
 
-
-# print data[:, 0]
-
-
 # row = np.size(data,0)
 # col = np.size(data,1)
 # print row, col
@@ -83,7 +81,7 @@ label = data[0:dataRowNo-windowSize, 0]/1024  # scaling label to be sec
 # print data.dtype
 
 ##### plotting
-plt.figure(subjectName+' '+filename)
+plt.figure(subjectName+' - '+filename+' - '+str(windowSize))
 
 # plotOrder = [1, 6, 2, 7, 3, 8, 4, 9, 5, 10]  # without filtering
 plotOrder = [0, 5, 1, 6, 2, 7, 3, 8, 4, 9]  # with filtering
@@ -96,18 +94,22 @@ for i in range(len(plotOrder)):
     ### with filtering
     plt.plot(label, filteredData[:, plotOrder[i]])
     plt.title(finalHeader[plotOrder[i]+1])
+    plt.xlim(xmax=label[-1])
+    plt.xlabel('Time (sec)')
+    plt.ylabel('Voltage (uV)')
     ### basic structure
     # plt.plot(data[range(np.size(data, 0)), i])
     # plt.title(finalHeader[i])
 # plt.tight_layout()  # tighten subplot layout
-plt.subplots_adjust(hspace=0.35)  # more specific that tight
-
+plt.subplots_adjust(hspace=0.45)  # more specific that tight
+# [xmin, xmax] = plt.xlim()   # return the current xlim
 
 ##### time counting
 timeStop = datetime.datetime.now()
 totalTime = timeStop-timeStart
 print 'this used', totalTime.total_seconds(), 'sec'
 
+##### finish with show plot
 plt.show()
 
 
