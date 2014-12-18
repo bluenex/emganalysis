@@ -6,6 +6,10 @@ import datetime
 import sys
 import smootingFilter
 
+##### plotting list
+## [0,L-Deltoid][1,L-Tricep][2,L-Biceps][3,L-Flex][4,L-Ex]
+## [5,R-Deltoid][6,R-Tricep][7,R-Biceps][8,R-Flex][9,R-Ex]
+
 ##### time counting
 timeStart = datetime.datetime.now()
 
@@ -48,51 +52,31 @@ dataColNo = len(finalHeader)  # number of data in column
 ##### data manipulation
 data = np.resize(data, (dataRowNo, dataColNo))  # 0th row is number of each data
 data = data.astype(np.float)
-# data = abs(data)  # rectification
+data = abs(data)  # rectification
 windowSize = 100  # window size for smoothing
 
 ### smoothing filter / because applying filter will cut data out the length of window size
 ### thus no filter data will have to be cut data out the same length as filtered data
 ### for the convenient of plotting
-filteredData0 = data[0+(windowSize/2):-1-(windowSize/2)+1, 1:] # no filter
-# filteredData = smootingFilter.movingAvg(windowSize, data[:, 1:])  # ignore label of data number, data[:,0]
-filteredData = smootingFilter.rms(windowSize, data[:, 1:])
+filteredData0 = data[0+(windowSize/2):-1-(windowSize/2)+1, 1:]  # no filter
+filteredData1 = smootingFilter.movingAvg(windowSize, data[:, 1:])  # ignore label of data number, at data[:,0]
+filteredData2 = smootingFilter.rms(windowSize, data[:, 1:])  # root mean square filter
 label = []
 label = data[0:dataRowNo-windowSize, 0]/samplingRate  # scaling x axis label to be sec (deviding by sampling rate)
-
-# newdtRow = np.size(newData, 0)
-# newdtCol = np.size(newData, 1)
-# print 'row = %d, col = %d' % (newdtRow, newdtCol)
-# print 'start data', newData[0, :]
-#
-# print 'end data', newData[-1:-10:-1, :]
-
-# windowSize = 32
-# startPoint = windowSize/2 # 16
-# print 'startPoint[%d]' % startPoint, data[startPoint-1, 1:6]
-# print 'window initial point[%s]' % str(startPoint-startPoint), data[startPoint-startPoint, 1:6]
-# print 'window terminal point[%s]' % str(startPoint+startPoint-1), data[startPoint+startPoint-1, 1:6]
-# print 'sum value no parentheses', sum(data[startPoint-startPoint:startPoint+startPoint-1, 1:6])/windowSize
-# print 'sum value with parentheses', (sum(data[startPoint-startPoint:startPoint+startPoint-1, 1:6]))/windowSize
-# print data[:,1:]
-
-# row = np.size(data,0)
-# col = np.size(data,1)
-# print row, col
-
-# print data.dtype
 
 ##### plotting
 plt.figure(subjectName+' - '+filename+' - '+str(windowSize))
 
 # plotOrder = [1, 6, 2, 7, 3, 8, 4, 9, 5, 10]  # without filtering
 plotOrder = [0, 5, 1, 6, 2, 7, 3, 8, 4, 9]  # with filtering
+# plotOrder = [0]
 for i in range(len(plotOrder)):
 # for i in range(10):
     plt.subplot(5, 2, 1+i)
     ### with filtering
-    plt.plot(label, filteredData0[:, plotOrder[i]], 'b--')
-    plt.plot(label, filteredData[:, plotOrder[i]], 'r', linewidth=2.0)
+    plt.plot(label, filteredData0[:, plotOrder[i]], 'b--', label="no filter")
+    plt.plot(label, filteredData1[:, plotOrder[i]], 'r', linewidth=2.0, label="mAvg filter")
+    # plt.plot(label, filteredData2[:, plotOrder[i]], 'g', linewidth=2.0, label="rms filter")
     plt.title(finalHeader[plotOrder[i]+1])
     plt.xlim(xmax=label[-1])
     plt.xlabel('Time (sec)')
@@ -111,4 +95,5 @@ totalTime = timeStop-timeStart
 print 'this used', totalTime.total_seconds(), 'sec'
 
 ##### finish with show plot
+# plt.legend()
 plt.show()
