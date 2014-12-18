@@ -6,17 +6,23 @@ import datetime
 import sys
 import smootingFilter
 
-##### plotting list
+##### Initiation
+windowInit = 64
+## plotting list
 ## [0,L-Deltoid][1,L-Tricep][2,L-Biceps][3,L-Flex][4,L-Ex]
 ## [5,R-Deltoid][6,R-Tricep][7,R-Biceps][8,R-Flex][9,R-Ex]
+plotOrder = [5]
+if plotOrder == 'all':
+    plotOrder = [0, 5, 1, 6, 2, 7, 3, 8, 4, 9]  # with filtering
+plotSet = [0, 0, 1]  # [nofilter, mAvg, RMS]
 
 ##### time counting
 timeStart = datetime.datetime.now()
 
 ##### file section
 subjectName = 'Aon'
-# filename = '0_3roll.ASC'
-filename = '0_3yaw.ASC'
+filename = '0_3roll.ASC'
+# filename = '0_3yaw.ASC'
 
 # header = linecache.getline(filename, 3) # another method to get line
 
@@ -53,7 +59,7 @@ dataColNo = len(finalHeader)  # number of data in column
 data = np.resize(data, (dataRowNo, dataColNo))  # 0th row is number of each data
 data = data.astype(np.float)
 data = abs(data)  # rectification
-windowSize = 100  # window size for smoothing
+windowSize = windowInit  # window size for smoothing
 
 ### smoothing filter / because applying filter will cut data out the length of window size
 ### thus no filter data will have to be cut data out the same length as filtered data
@@ -67,16 +73,17 @@ label = data[0:dataRowNo-windowSize, 0]/samplingRate  # scaling x axis label to 
 ##### plotting
 plt.figure(subjectName+' - '+filename+' - '+str(windowSize))
 
-# plotOrder = [1, 6, 2, 7, 3, 8, 4, 9, 5, 10]  # without filtering
-plotOrder = [0, 5, 1, 6, 2, 7, 3, 8, 4, 9]  # with filtering
-# plotOrder = [0]
 for i in range(len(plotOrder)):
 # for i in range(10):
-    plt.subplot(5, 2, 1+i)
+    if len(plotOrder) != 1:
+        plt.subplot(5, 2, 1+i)
     ### with filtering
-    plt.plot(label, filteredData0[:, plotOrder[i]], 'b--', label="no filter")
-    plt.plot(label, filteredData1[:, plotOrder[i]], 'r', linewidth=2.0, label="mAvg filter")
-    # plt.plot(label, filteredData2[:, plotOrder[i]], 'g', linewidth=2.0, label="rms filter")
+    if plotSet[0] == 1:
+        plt.plot(label, filteredData0[:, plotOrder[i]], 'b--', label="no filter")
+    if plotSet[1] == 1:
+        plt.plot(label, filteredData1[:, plotOrder[i]], 'r', linewidth=2.0, label="mAvg filter")
+    if plotSet[2] == 1:
+        plt.plot(label, filteredData2[:, plotOrder[i]], 'g', linewidth=2.0, label="rms filter")
     plt.title(finalHeader[plotOrder[i]+1])
     plt.xlim(xmax=label[-1])
     plt.xlabel('Time (sec)')
@@ -95,5 +102,7 @@ totalTime = timeStop-timeStart
 print 'this used', totalTime.total_seconds(), 'sec'
 
 ##### finish with show plot
-# plt.legend()
+# if sum(plotSet) == 1:
+if len(plotOrder) == 1:
+    plt.legend()
 plt.show()
