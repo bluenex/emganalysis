@@ -17,12 +17,13 @@ filename = '0_3yaw.ASC'
 # header = linecache.getline(filename, 3) # another method to get line
 
 ##### loop through the file
-data = [] # pre-allocation
+data = []  # pre-allocation
 
 f = open(filename)
 for i, line in enumerate(f):
     if i == 0:
         samplingRate = line.split()  # collect frequency used
+        samplingRate = int(samplingRate[0])
         # print 'samplingRate', samplingRate
     elif i == 2:
         header = line  # collect header
@@ -42,21 +43,22 @@ finalHeader = [splited[0]]  # pre-allocation
 
 for i in range(loopNo):
     finalHeader.append(splited[(3*i)+1]+splited[(3*i)+2]+splited[(3*i)+3])  # rearrange header
-dataColNo = len(finalHeader) # number of data in column
+dataColNo = len(finalHeader)  # number of data in column
 
 ##### data manipulation
 data = np.resize(data, (dataRowNo, dataColNo))  # 0th row is number of each data
 data = data.astype(np.float)
 # data = abs(data)  # rectification
 windowSize = 100  # window size for smoothing
-# data[:, 0] = data[:, 0]/1024  # scaling label to be sec
 
-### smoothing filter
+### smoothing filter / because applying filter will cut data out the length of window size
+### thus no filter data will have to be cut data out the same length as filtered data
+### for the convenient of plotting
+filteredData0 = data[0+(windowSize/2):-1-(windowSize/2)+1, 1:] # no filter
 # filteredData = smootingFilter.movingAvg(windowSize, data[:, 1:])  # ignore label of data number, data[:,0]
 filteredData = smootingFilter.rms(windowSize, data[:, 1:])
-
 label = []
-label = data[0:dataRowNo-windowSize, 0]/1024  # scaling label to be sec
+label = data[0:dataRowNo-windowSize, 0]/samplingRate  # scaling x axis label to be sec (deviding by sampling rate)
 
 # newdtRow = np.size(newData, 0)
 # newdtCol = np.size(newData, 1)
@@ -88,17 +90,16 @@ plotOrder = [0, 5, 1, 6, 2, 7, 3, 8, 4, 9]  # with filtering
 for i in range(len(plotOrder)):
 # for i in range(10):
     plt.subplot(5, 2, 1+i)
-    ### without filtering
-    # plt.plot(data[:, 0], data[range(np.size(data, 0)), plotOrder[i]])
-    # plt.title(finalHeader[plotOrder[i]])
     ### with filtering
-    plt.plot(label, filteredData[:, plotOrder[i]])
+    plt.plot(label, filteredData0[:, plotOrder[i]], 'b--')
+    plt.plot(label, filteredData[:, plotOrder[i]], 'r', linewidth=2.0)
     plt.title(finalHeader[plotOrder[i]+1])
     plt.xlim(xmax=label[-1])
     plt.xlabel('Time (sec)')
     plt.ylabel('Voltage (uV)')
     ### basic structure
-    # plt.plot(data[range(np.size(data, 0)), i])
+    # plt.plot(data[range(np.size(data
+    # , 0)), i])
     # plt.title(finalHeader[i])
 # plt.tight_layout()  # tighten subplot layout
 plt.subplots_adjust(hspace=0.45)  # more specific that tight
@@ -111,6 +112,3 @@ print 'this used', totalTime.total_seconds(), 'sec'
 
 ##### finish with show plot
 plt.show()
-
-
-
