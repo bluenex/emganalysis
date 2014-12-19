@@ -108,4 +108,4 @@ print 'this used', totalTime.total_seconds(), 'sec'
 # if sum(plotSet) == 1:
 if len(plotOrder) == 1:
     plt.legend()
-plt.show()
+# plt.show()
