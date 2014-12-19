@@ -11,7 +11,7 @@ windowInit = 64
 ## plotting list
 ## [0,L-Deltoid][1,L-Tricep][2,L-Biceps][3,L-Flex][4,L-Ex]
 ## [5,R-Deltoid][6,R-Tricep][7,R-Biceps][8,R-Flex][9,R-Ex]
-plotOrder = [5]
+plotOrder = 'all'
 if plotOrder == 'all':
     plotOrder = [0, 5, 1, 6, 2, 7, 3, 8, 4, 9]  # with filtering
 plotSet = [0, 0, 1]  # [nofilter, mAvg, RMS]
@@ -20,8 +20,10 @@ plotSet = [0, 0, 1]  # [nofilter, mAvg, RMS]
 timeStart = datetime.datetime.now()
 
 ##### file section
-subjectName = 'Aon'
-filename = '0_3roll.ASC'
+subjectName = 'P\'A'
+motorSpeed = ['0', '0_3', '0_5', '0_8', '1']
+actionPlane = ['yaw', 'roll']
+filename = motorSpeed[0]+actionPlane[0]+'.ASC'
 # filename = '0_3yaw.ASC'
 
 # header = linecache.getline(filename, 3) # another method to get line
@@ -67,6 +69,7 @@ windowSize = windowInit  # window size for smoothing
 filteredData0 = data[0+(windowSize/2):-1-(windowSize/2)+1, 1:]  # no filter
 filteredData1 = smootingFilter.movingAvg(windowSize, data[:, 1:])  # ignore label of data number, at data[:,0]
 filteredData2 = smootingFilter.rms(windowSize, data[:, 1:])  # root mean square filter
+
 label = []
 label = data[0:dataRowNo-windowSize, 0]/samplingRate  # scaling x axis label to be sec (deviding by sampling rate)
 
@@ -81,9 +84,9 @@ for i in range(len(plotOrder)):
     if plotSet[0] == 1:
         plt.plot(label, filteredData0[:, plotOrder[i]], 'b--', label="no filter")
     if plotSet[1] == 1:
-        plt.plot(label, filteredData1[:, plotOrder[i]], 'r', linewidth=2.0, label="mAvg filter")
+        plt.plot(label, filteredData1[:, plotOrder[i]], 'k', linewidth=2.0, label="mAvg filter")
     if plotSet[2] == 1:
-        plt.plot(label, filteredData2[:, plotOrder[i]], 'g', linewidth=2.0, label="rms filter")
+        plt.plot(label, filteredData2[:, plotOrder[i]], 'r', linewidth=2.0, label="rms filter")
     plt.title(finalHeader[plotOrder[i]+1])
     plt.xlim(xmax=label[-1])
     plt.xlabel('Time (sec)')
