@@ -32,7 +32,7 @@ savedir = os.path.join(subjectName, 'processed')
 print np.max(dataAon0roll64LDel,axis=0)
 #
 # subjectName = 'Aon'
-actionname2 = '1yaw.ASC'
+actionname2 = '0roll.ASC'
 # musclename = 7
 # windowSize = 64
 # filterType = ['rectify', 'mAvg', 'rms']
