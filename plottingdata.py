@@ -55,7 +55,7 @@ import getData
 #
 # # plt.figure(subjectName+)
 def singlePlot(actionname, musclename, fstcoldtassec, data, color):
-    plt.plot(fstcoldtassec, data[:, musclename], color, label=actionname)
+    plt.plot(fstcoldtassec, data[:, musclename-1], color, label=actionname)
     tempY = np.max(data)
     yMAX = np.around(tempY, decimals=-2)
     if tempY > yMAX:
