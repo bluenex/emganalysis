@@ -43,3 +43,9 @@ stunnel.log
 
 # Ignore the config file that's used for gh-pages.
 _config.gh-pages.yml
+
+# Created by https://www.gitignore.io
+
+### IPythonNotebook ###
+# Temporary data
+.ipynb_checkpoints/
